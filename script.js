@@ -111,6 +111,27 @@ const changeLang = () => {
   }
 };
 
+const isShiftActive = () => {
+  let shift1Left = document.querySelectorAll(`.key[data-value='Shift']`)[0];
+  let shiftRigth = document.querySelectorAll(`.key[data-value='Shift']`)[1];
+
+  if (
+    shift1Left.classList.contains("key_active") ||
+    shiftRigth.classList.contains("key_active")
+  ) {
+    shift1Left.classList.remove("key_active");
+    shiftRigth.classList.remove("key_active");
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const isCapsActive = () => {
+  let caps = document.querySelector(`.key[data-value='CapsLock']`);
+  return caps.classList.contains("key_active") ? true : false;
+};
+
 //ES6+ feature - arrow functions
 const activateKey = (e) => {
   e.preventDefault();
@@ -128,58 +149,41 @@ const activateKey = (e) => {
     key = e.currentTarget;
   }
 
-  if (key.dataset.value) {
+  if (key.dataset) {
     if (key.dataset.value !== "CapsLock" && key.dataset.value !== "Shift") {
       key.classList.add("key_active");
     }
 
-    let shift1Left = document.querySelectorAll(`.key[data-code='16']`)[0];
-    let shiftRigth = document.querySelectorAll(`.key[data-code='16']`)[1];
-
     switch (key.dataset.value) {
       case "Spase":
         textarea.textContent += " ";
+        isShiftActive();
         break;
       case "Backspase":
         textarea.textContent = textarea.textContent.slice(0, -1);
+        isShiftActive();
         break;
       case "Tab":
         textarea.textContent += "\t";
+        isShiftActive();
         break;
       case "Enter":
         textarea.textContent += "\n";
+        isShiftActive();
         break;
       case "Alt":
-        if (
-          shift1Left.classList.contains("key_active") ||
-          shiftRigth.classList.contains("key_active")
-        ) {
-          shift1Left.classList.remove("key_active");
-          shiftRigth.classList.remove("key_active");
-          changeLang();
-        }
+        isShiftActive() ? changeLang() : false;
         break;
       case "Shift":
-        if (
-          shift1Left.classList.contains("key_active") ||
-          shiftRigth.classList.contains("key_active")
-        ) {
-          shift1Left.classList.remove("key_active");
-          shiftRigth.classList.remove("key_active");
-        } else {
-          key.classList.add("key_active");
-        }
+        !isShiftActive() ? key.classList.add("key_active") : false;
         break;
       case "Del":
-        //
-        break;
       case "Win":
-        //
-        break;
       case "Ctrl":
-        //
+        isShiftActive();
         break;
       case "CapsLock":
+        isShiftActive();
         if (key.classList.contains("key_active")) {
           key.classList.remove("key_active");
         } else {
@@ -188,19 +192,15 @@ const activateKey = (e) => {
         break;
 
       default:
-        let caps = document.querySelector(`.key[data-code='20']`);
-        if (
-          shift1Left.classList.contains("key_active") ||
-          shiftRigth.classList.contains("key_active")
-        ) {
+        if (isShiftActive()) {
           if (key.dataset.shift) {
             textarea.innerHTML += `${key.dataset.shift}`;
           } else {
-            textarea.innerHTML += `${key.innerHTML.toUpperCase()}`;
+            isCapsActive()
+              ? (textarea.innerHTML += `${key.innerHTML.toLowerCase()}`)
+              : (textarea.innerHTML += `${key.innerHTML.toUpperCase()}`);
           }
-          shift1Left.classList.remove("key_active");
-          shiftRigth.classList.remove("key_active");
-        } else if (caps.classList.contains("key_active")) {
+        } else if (isCapsActive()) {
           textarea.innerHTML += `${key.innerHTML.toUpperCase()}`;
         } else {
           const textarea2 = document.querySelector(".textarea");
