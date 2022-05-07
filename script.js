@@ -91,6 +91,26 @@ main.append(textarea);
 main.append(keyboard);
 main.append(info);
 
+let lang = "en";
+let lettersKeys = [];
+
+const changeLang = () => {
+  switch (lang) {
+    case "en":
+      lang = "ru";
+      lettersKeys.forEach((key) => {
+        key.innerHTML = key.dataset.ru;
+      });
+      break;
+    case "ru":
+      lang = "en";
+      lettersKeys.forEach((key) => {
+        key.innerHTML = key.dataset.value;
+      });
+      break;
+  }
+};
+
 //ES6+ feature - arrow functions
 const activateKey = (e) => {
   e.preventDefault();
@@ -134,7 +154,9 @@ const activateKey = (e) => {
           shift1Left.classList.contains("key_active") ||
           shiftRigth.classList.contains("key_active")
         ) {
-          changelang();
+          shift1Left.classList.remove("key_active");
+          shiftRigth.classList.remove("key_active");
+          changeLang();
         }
         break;
       case "Shift":
@@ -174,15 +196,15 @@ const activateKey = (e) => {
           if (key.dataset.shift) {
             textarea.innerHTML += `${key.dataset.shift}`;
           } else {
-            textarea.innerHTML += `${key.dataset.value.toUpperCase()}`;
+            textarea.innerHTML += `${key.innerHTML.toUpperCase()}`;
           }
           shift1Left.classList.remove("key_active");
           shiftRigth.classList.remove("key_active");
         } else if (caps.classList.contains("key_active")) {
-          textarea.innerHTML += `${key.dataset.value.toUpperCase()}`;
+          textarea.innerHTML += `${key.innerHTML.toUpperCase()}`;
         } else {
           const textarea2 = document.querySelector(".textarea");
-          textarea2.innerHTML += `${key.dataset.value.toLowerCase()}`;
+          textarea2.innerHTML += `${key.innerHTML.toLowerCase()}`;
         }
         break;
     }
@@ -255,6 +277,7 @@ for (let i = 1; i <= 5; i++) {
     }
     if (keys[i].hasOwnProperty("ru")) {
       key.dataset.ru = keys[i].ru;
+      lettersKeys.push(key);
     }
 
     key.addEventListener("mousedown", activateKey);
