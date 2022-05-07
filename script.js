@@ -91,6 +91,127 @@ main.append(textarea);
 main.append(keyboard);
 main.append(info);
 
+//ES6+ feature - arrow functions
+const activateKey = (e) => {
+  e.preventDefault();
+
+  let key = null;
+  if (e.type == "keydown") {
+    if (e.location == 1) {
+      key = document.querySelectorAll(`.key[data-code='${e.keyCode}']`)[0];
+    } else if (e.location == 2) {
+      key = document.querySelectorAll(`.key[data-code='${e.keyCode}']`)[1];
+    } else {
+      key = document.querySelector(`.key[data-code='${e.keyCode}']`);
+    }
+  } else {
+    key = e.currentTarget;
+  }
+
+  if (key.dataset.value) {
+    if (key.dataset.value !== "CapsLock" && key.dataset.value !== "Shift") {
+      key.classList.add("key_active");
+    }
+
+    let shift1Left = document.querySelectorAll(`.key[data-code='16']`)[0];
+    let shiftRigth = document.querySelectorAll(`.key[data-code='16']`)[1];
+
+    switch (key.dataset.value) {
+      case "Spase":
+        textarea.textContent += " ";
+        break;
+      case "Backspase":
+        textarea.textContent = textarea.textContent.slice(0, -1);
+        break;
+      case "Tab":
+        textarea.textContent += "\t";
+        break;
+      case "Enter":
+        textarea.textContent += "\n";
+        break;
+      case "Alt":
+        if (
+          shift1Left.classList.contains("key_active") ||
+          shiftRigth.classList.contains("key_active")
+        ) {
+          changelang();
+        }
+        break;
+      case "Shift":
+        if (
+          shift1Left.classList.contains("key_active") ||
+          shiftRigth.classList.contains("key_active")
+        ) {
+          shift1Left.classList.remove("key_active");
+          shiftRigth.classList.remove("key_active");
+        } else {
+          key.classList.add("key_active");
+        }
+        break;
+      case "Del":
+        //
+        break;
+      case "Win":
+        //
+        break;
+      case "Ctrl":
+        //
+        break;
+      case "CapsLock":
+        if (key.classList.contains("key_active")) {
+          key.classList.remove("key_active");
+        } else {
+          key.classList.add("key_active");
+        }
+        break;
+
+      default:
+        let caps = document.querySelector(`.key[data-code='20']`);
+        if (
+          shift1Left.classList.contains("key_active") ||
+          shiftRigth.classList.contains("key_active")
+        ) {
+          if (key.dataset.shift) {
+            textarea.innerHTML += `${key.dataset.shift}`;
+          } else {
+            textarea.innerHTML += `${key.dataset.value.toUpperCase()}`;
+          }
+          shift1Left.classList.remove("key_active");
+          shiftRigth.classList.remove("key_active");
+        } else if (caps.classList.contains("key_active")) {
+          textarea.innerHTML += `${key.dataset.value.toUpperCase()}`;
+        } else {
+          const textarea2 = document.querySelector(".textarea");
+          textarea2.innerHTML += `${key.dataset.value.toLowerCase()}`;
+        }
+        break;
+    }
+    textarea.setSelectionRange(
+      textarea.textContent.length,
+      textarea.textContent.length
+    );
+  }
+  textarea.onblur = () => textarea.focus();
+  textarea.focus();
+};
+
+const deactivateKey = (e) => {
+  let key = null;
+  if (e.type == "keyup") {
+    if (e.location == 1) {
+      key = document.querySelectorAll(`.key[data-code='${e.keyCode}']`)[0];
+    } else if (e.location == 2) {
+      key = document.querySelectorAll(`.key[data-code='${e.keyCode}']`)[1];
+    } else {
+      key = document.querySelector(`.key[data-code='${e.keyCode}']`);
+    }
+  } else {
+    key = e.currentTarget;
+  }
+
+  key?.classList.remove("key_active");
+};
+
 //create keys
 for (let i = 1; i <= 5; i++) {
   let row = document.createElement("div");
@@ -135,7 +256,21 @@ for (let i = 1; i <= 5; i++) {
     if (keys[i].hasOwnProperty("ru")) {
       key.dataset.ru = keys[i].ru;
     }
+
+    key.addEventListener("mousedown", activateKey);
+    if (key.dataset.value !== "Shift" && key.dataset.value !== "CapsLock") {
+      key.addEventListener("mouseup", deactivateKey);
+      key.addEventListener("mouseout", deactivateKey);
+    }
+
     row.append(key);
   }
   keyboard.append(row);
 }
+
+window.addEventListener("keydown", activateKey);
+window.addEventListener("keyup", (event) => {
+  if (event.key !== "CapsLock") {
+    deactivateKey(event);
+  }
+});
