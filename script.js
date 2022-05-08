@@ -113,12 +113,15 @@ const changeLang = (currentLang) => {
   }
 };
 
+let cursorStart;
+let cursorEnd;
+let textBeforeCursor;
+let textAfterCursor;
+
 const isShiftActive = () => {
   const shifts = document.querySelectorAll(".key[data-value='Shift']");
   const shift1Left = shifts[0];
   const shiftRigth = shifts[1];
-  //   const shift1Left = document.querySelectorAll(".key[data-value='Shift']")[0];
-  //   const shiftRigth = document.querySelectorAll(".key[data-value='Shift']")[1];
 
   if (
     shift1Left.classList.contains('key_active')
@@ -153,27 +156,62 @@ const activateKey = (e) => {
   }
 
   if (key?.dataset) {
+    cursorStart = textarea.selectionStart;
+    cursorEnd = textarea.selectionEnd;
+    textBeforeCursor = textarea.textContent.substring(0, cursorStart);
+    textAfterCursor = textarea.textContent.substring(cursorEnd);
+    textarea.setSelectionRange(cursorStart, cursorEnd);
+
     e.preventDefault();
     if (key.dataset.value !== 'CapsLock' && key.dataset.value !== 'Shift') {
       key.classList.add('key_active');
     }
 
+    let currentLetter;
     switch (key.dataset.value) {
       case 'Spase':
-        textarea.textContent += ' ';
+        textarea.textContent = `${textBeforeCursor} ${textAfterCursor}`;
         isShiftActive();
+        if (cursorStart === textarea.innerHTML.length - 1) {
+          cursorStart = textarea.innerHTML.length;
+        } else {
+          cursorStart += 1;
+        }
+        cursorEnd = cursorStart;
         break;
       case 'Backspase':
-        textarea.textContent = textarea.textContent.slice(0, -1);
+        if (cursorStart === cursorEnd) {
+          textarea.textContent = textBeforeCursor.slice(0, -1) + textAfterCursor;
+          if (cursorStart !== 0) {
+            cursorStart -= 1;
+          }
+          cursorEnd = cursorStart;
+        } else {
+          textarea.textContent = textBeforeCursor + textAfterCursor;
+          cursorEnd = cursorStart;
+        }
+        textarea.textContent = textBeforeCursor.slice(0, -1) + textAfterCursor;
         isShiftActive();
         break;
       case 'Tab':
-        textarea.textContent += '\t';
+        textarea.textContent = `${textBeforeCursor}\t${textAfterCursor}`;
         isShiftActive();
+        if (cursorStart === textarea.innerHTML.length - 1) {
+          cursorStart = textarea.innerHTML.length;
+        } else {
+          cursorStart += 1;
+        }
+        cursorEnd = cursorStart;
         break;
       case 'Enter':
-        textarea.textContent += '\n';
+        textarea.textContent = `${textBeforeCursor}\n${textAfterCursor}`;
         isShiftActive();
+        if (cursorStart === textarea.innerHTML.length - 1) {
+          cursorStart = textarea.innerHTML.length;
+        } else {
+          cursorStart += 1;
+        }
+        cursorEnd = cursorStart;
         break;
       case 'Alt':
         if (isShiftActive()) {
@@ -191,6 +229,14 @@ const activateKey = (e) => {
         }
         break;
       case 'Del':
+        isShiftActive();
+        if (cursorStart === cursorEnd) {
+          textarea.textContent = textBeforeCursor + textAfterCursor.slice(1);
+        } else {
+          textarea.textContent = textBeforeCursor + textAfterCursor;
+          cursorEnd = cursorStart;
+        }
+        break;
       case 'Win':
       case 'Ctrl':
         isShiftActive();
@@ -207,25 +253,31 @@ const activateKey = (e) => {
       default:
         if (isShiftActive()) {
           if (key.dataset.shift) {
-            textarea.innerHTML += `${key.dataset.shift}`;
+            currentLetter = `${key.dataset.shift}`;
           } else if (isCapsActive()) {
-            textarea.innerHTML += `${key.innerHTML.toLowerCase()}`;
+            currentLetter = `${key.innerHTML.toLowerCase()}`;
           } else {
-            textarea.innerHTML += `${key.innerHTML.toUpperCase()}`;
+            currentLetter = `${key.innerHTML.toUpperCase()}`;
           }
         } else if (isCapsActive()) {
-          textarea.innerHTML += `${key.innerHTML.toUpperCase()}`;
+          currentLetter = `${key.innerHTML.toUpperCase()}`;
         } else {
-          const textarea2 = document.querySelector('.textarea');
-          textarea2.innerHTML += `${key.innerHTML.toLowerCase()}`;
+          currentLetter = `${key.innerHTML.toLowerCase()}`;
         }
+        textarea.innerHTML = textBeforeCursor + currentLetter + textAfterCursor;
+        if (cursorStart === textarea.innerHTML.length - 1) {
+          cursorStart = textarea.innerHTML.length;
+        } else {
+          cursorStart += 1;
+        }
+        cursorEnd = cursorStart;
         break;
     }
-    textarea.setSelectionRange(
-      textarea.textContent.length,
-      textarea.textContent.length,
-    );
   }
+
+  textarea.selectionStart = cursorStart;
+  textarea.selectionEnd = cursorEnd;
+
   textarea.onblur = () => textarea.focus();
   textarea.focus();
 };
