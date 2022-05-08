@@ -139,6 +139,15 @@ const isCapsActive = () => {
   return !!caps.classList.contains('key_active');
 };
 
+const movingCursor = () => {
+  if (cursorStart === textarea.innerHTML.length - 1) {
+    cursorStart = textarea.innerHTML.length;
+  } else {
+    cursorStart += 1;
+  }
+  cursorEnd = cursorStart;
+};
+
 // ES6+ feature - arrow functions
 const activateKey = (e) => {
   let key = null;
@@ -172,12 +181,7 @@ const activateKey = (e) => {
       case 'Spase':
         textarea.textContent = `${textBeforeCursor} ${textAfterCursor}`;
         isShiftActive();
-        if (cursorStart === textarea.innerHTML.length - 1) {
-          cursorStart = textarea.innerHTML.length;
-        } else {
-          cursorStart += 1;
-        }
-        cursorEnd = cursorStart;
+        movingCursor();
         break;
       case 'Backspase':
         if (cursorStart === cursorEnd) {
@@ -196,22 +200,12 @@ const activateKey = (e) => {
       case 'Tab':
         textarea.textContent = `${textBeforeCursor}\t${textAfterCursor}`;
         isShiftActive();
-        if (cursorStart === textarea.innerHTML.length - 1) {
-          cursorStart = textarea.innerHTML.length;
-        } else {
-          cursorStart += 1;
-        }
-        cursorEnd = cursorStart;
+        movingCursor();
         break;
       case 'Enter':
         textarea.textContent = `${textBeforeCursor}\n${textAfterCursor}`;
         isShiftActive();
-        if (cursorStart === textarea.innerHTML.length - 1) {
-          cursorStart = textarea.innerHTML.length;
-        } else {
-          cursorStart += 1;
-        }
-        cursorEnd = cursorStart;
+        movingCursor();
         break;
       case 'Alt':
         if (isShiftActive()) {
@@ -265,12 +259,7 @@ const activateKey = (e) => {
           currentLetter = `${key.innerHTML.toLowerCase()}`;
         }
         textarea.innerHTML = textBeforeCursor + currentLetter + textAfterCursor;
-        if (cursorStart === textarea.innerHTML.length - 1) {
-          cursorStart = textarea.innerHTML.length;
-        } else {
-          cursorStart += 1;
-        }
-        cursorEnd = cursorStart;
+        movingCursor();
         break;
     }
   }
