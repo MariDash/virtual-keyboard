@@ -52,7 +52,7 @@ const keys = [
   { value: 'M', ru: 'Ь', code: 77 },
   { value: ',', ru: 'Б', code: 188 },
   { value: '.', ru: 'Ю', code: 190 },
-  { value: '/', ru: '.', code: 291 },
+  { value: '/', ru: '.', code: 191 },
   { value: '&#5123', code: 38 },
   { value: 'Shift', code: 16 },
   { value: 'Ctrl', code: 17 },
@@ -153,6 +153,8 @@ const movingCursor = () => {
 
 // ES6+ feature - arrow functions
 const activateKey = (e) => {
+  e.preventDefault();
+
   let key = null;
   if (e.type === 'keydown') {
     const currentKey = document.querySelectorAll(
@@ -174,7 +176,6 @@ const activateKey = (e) => {
     textAfterCursor = textarea.textContent.substring(cursorEnd);
     textarea.setSelectionRange(cursorStart, cursorEnd);
 
-    e.preventDefault();
     if (key.dataset.value !== 'CapsLock' && key.dataset.value !== 'Shift') {
       key.classList.add('key_active');
     }
@@ -265,7 +266,7 @@ const activateKey = (e) => {
         } else {
           currentLetter = `${key.innerHTML.toLowerCase()}`;
         }
-        textarea.innerHTML = textBeforeCursor + currentLetter + textAfterCursor;
+        textarea.textContent = textBeforeCursor + currentLetter + textAfterCursor;
         movingCursor();
         break;
     }
