@@ -113,12 +113,8 @@ const changeLang = (currentLang) => {
   }
 };
 
-let cursorStart;
-let cursorEnd;
-let textBeforeCursor;
-let textAfterCursor;
-
-const isShiftActive = () => {
+let shiftEventType;
+const isShiftActive = (shiftType) => {
   const shifts = document.querySelectorAll(".key[data-value='Shift']");
   const shift1Left = shifts[0];
   const shiftRigth = shifts[1];
@@ -127,8 +123,10 @@ const isShiftActive = () => {
     shift1Left.classList.contains('key_active')
     || shiftRigth.classList.contains('key_active')
   ) {
-    shift1Left.classList.remove('key_active');
-    shiftRigth.classList.remove('key_active');
+    if (!shiftType) {
+      shift1Left.classList.remove('key_active');
+      shiftRigth.classList.remove('key_active');
+    }
     return true;
   }
   return false;
@@ -138,6 +136,11 @@ const isCapsActive = () => {
   const caps = document.querySelector(".key[data-value='CapsLock']");
   return !!caps.classList.contains('key_active');
 };
+
+let cursorStart;
+let cursorEnd;
+let textBeforeCursor;
+let textAfterCursor;
 
 const movingCursor = () => {
   if (cursorStart === textarea.innerHTML.length - 1) {
@@ -194,7 +197,6 @@ const activateKey = (e) => {
           textarea.textContent = textBeforeCursor + textAfterCursor;
           cursorEnd = cursorStart;
         }
-        textarea.textContent = textBeforeCursor.slice(0, -1) + textAfterCursor;
         isShiftActive();
         break;
       case 'Tab':
@@ -218,6 +220,11 @@ const activateKey = (e) => {
         }
         break;
       case 'Shift':
+        if (e.type === 'keydown') {
+          shiftEventType = 'keydown';
+        } else {
+          shiftEventType = 0;
+        }
         if (!isShiftActive()) {
           key.classList.add('key_active');
         }
@@ -245,7 +252,7 @@ const activateKey = (e) => {
         break;
 
       default:
-        if (isShiftActive()) {
+        if (isShiftActive(shiftEventType)) {
           if (key.dataset.shift) {
             currentLetter = `${key.dataset.shift}`;
           } else if (isCapsActive()) {
